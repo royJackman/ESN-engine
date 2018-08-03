@@ -67,32 +67,72 @@ def out(str,quiet,verbose,v=''):
 # retval:       Oscillatory weight matrix
 ###############################################################################
 
-def graphGen(n=128, p=0.3, seed=1618):
+weights = [-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+
+# Greaph generator function, as we discussed in lab
+def graphGen(n=128, p=0.3, seed=1618, circ=False):
     # Set the random seed for reproducibility
     np.random.seed(seed)
 
-    # Define weight matrix
+    # Define weightt matrix
     retval = np.zeros((n,n))
 
-    # Loop through nodes
-    for x in range(n):
+    if not circ:
+        # Loop through nodes
+        for x in range(n):
 
-        # Make it into a ring oscillator by connecting all nodes
-        retval[x,(x-1)] = np.random.randint(-15,16)
+            # Make it into a ring oscillator using the power of math
+            retval[x,(x+1)%n] = np.random.randint(-15,16)
 
-        # Loop through the rest of the nodes
-        for y in range(n):
+            # Loop through the rest of the nodes
+            for y in range(n):
 
-            # If it will make an odd loop...
-            if abs(x - y)%2 == 0 and y != (x-1) and y != x:
+                # If it will make an odd loop...
+                if abs(x - y)%2 == 0 and y != (x-1) and y != x:
 
-                # Give it some probability
-                t = np.random.rand()
+                    # Give it some probability
+                    t = np.random.rand()
 
-                # Add edge if the random number was within range
-                if t <= p:
-                    retval[x,y] = np.random.randint(-15,16)
+                    # Add edge if the random number was within range
+                    if t <= p:
+                        retval[x,y] = np.random.randint(-15,16)
     
+    else:
+        for x in range(n):
+            retval[x,(x+1)%n] = random.choice(weights)
+
+        o = n
+        loops = []
+        while o > 4:
+            print(o)
+            if o % 2 == 1:
+                p = (o-1)/2
+                if len(loops) == 0:
+                    loops.append((0,p+1))
+                    loops.append((p,0))
+                else:
+                    temp = loops
+                    loops = []
+                    for t in temp:
+                        loops.append(((t[1]+p),t[1]))
+                        loops.append((t[0],(t[1]+p)))
+            else:
+                p = (o-2)/2
+                if len(loops) == 0:
+                    loops.append((p,0))
+                    loops.append((-1,p+1))
+                else:
+                    temp = loops
+                    loops = []
+                    for t in temp:
+                        loops.append(((t[1]+p),t[1]))
+                        loops.append((t[0],(t[1]+p+1)))
+            o = p+1
+            print(loops)
+            for l in loops:
+                retval[int(l[0]),int(l[1])] = random.choice(weights)
+
+
     # Return the weight matrix
     return retval
 
