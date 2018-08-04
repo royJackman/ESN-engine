@@ -69,12 +69,11 @@ def out(str,quiet,verbose,v=''):
 
 weights = [-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 
-# Greaph generator function, as we discussed in lab
-def graphGen(n=128, p=0.3, seed=1618, circ=False):
+def graphGen(n=128, p=0.3, seed=1618, circ=False, verbose=False):
     # Set the random seed for reproducibility
     np.random.seed(seed)
 
-    # Define weightt matrix
+    # Define weight matrix
     retval = np.zeros((n,n))
 
     if not circ:
@@ -98,13 +97,14 @@ def graphGen(n=128, p=0.3, seed=1618, circ=False):
                         retval[x,y] = np.random.randint(-15,16)
     
     else:
+        # Make a ring oscillator first
         for x in range(n):
             retval[x,(x+1)%n] = random.choice(weights)
 
         o = n
         loops = []
         while o > 4:
-            print(o)
+            if verbose: print(o)
             if o % 2 == 1:
                 p = (o-1)/2
                 if len(loops) == 0:
@@ -128,10 +128,20 @@ def graphGen(n=128, p=0.3, seed=1618, circ=False):
                         loops.append(((t[1]+p),t[1]))
                         loops.append((t[0],(t[1]+p+1)))
             o = p+1
-            print(loops)
+            if verbose: print(loops)
             for l in loops:
                 retval[int(l[0]),int(l[1])] = random.choice(weights)
-
+        if o in [3,4]:
+            if len(loops) == 0:
+                loops.append((2,0))
+            else:
+                temp = loops
+                loops = []
+                for t in temp:
+                    loops.append(((t[1]+2),t[1]))
+        if verbose: print(loops)
+        for l in loops:
+                retval[int(l[0]),int(l[1])] = random.choice(weights)
 
     # Return the weight matrix
     return retval

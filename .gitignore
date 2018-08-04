@@ -2,3 +2,5 @@
 gen\.png
 
 __pycache__/
+
+graphPrinter.py
