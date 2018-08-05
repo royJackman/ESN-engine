@@ -1,0 +1,12 @@
+
+gen\.png
+
+__pycache__/
+
+graphPrinter.py
+hopfield.py
+hopfieldSmall.py
+dataGen.py
+dataGenSmall.py
+
+*.txt
