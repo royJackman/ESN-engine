@@ -269,7 +269,7 @@ class esn:
             self.outputNodes = nodes[inputNodes:]
             out('Input and output locations generated', self.q, self.v, 'Inputs located at nodes ' + str(self.inputNodes) + ' and outputs located at nodes ' + str(self.outputNodes))
 
-        # If only outs is undefines, generate some output locations
+        # If only outs is undefined, generate some output locations
         elif ins != None:
             if len(ins) != inputNodes:
                 if not self.q:
@@ -569,8 +569,8 @@ class esn:
                 sys.exit("Solution not converged in limit")
             else:
                 # Else return the related information
-                g = self.converge(buffer, boo=False)
-                m = int(max(g))
+                # g = self.converge(buffer, boo=False)
+                # m = int(max(g))
                 return buffer[-1:,:] #np.mean(buffer[-m:,:], axis=1)
 
 
