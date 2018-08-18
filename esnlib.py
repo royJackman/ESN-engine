@@ -320,7 +320,7 @@ class esn:
 
             # Generate new matricies accordingly
             if matrixType == 'osci':
-                self.W = graphGen(self.res, p=prob, seed=self.s)
+                self.W = graphGen(self.res, p=prob, seed=self.s, type='osci')
                 out("Oscillatory graph generated successfully", self.q, self.v)
             elif matrixType == 'csw':
                 self.W = nx.to_numpy_matrix(nx.connected_watts_strogatz_graph(self.res, int(np.floor(np.sqrt(self.res) + 1)), self.p, tries=100, seed=self.s))
