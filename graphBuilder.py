@@ -98,5 +98,9 @@ def graphGen(n=128, p=0.3, seed=1618, type="circular", verbose=False):
             if verbose: print(loops)
             for l in loops:
                 retval[int(l[0]),int(l[1])] = random.choice(weights)
+    elif type == 'oscirc':
+        for x in range(n):
+            retval[x,(x+1)%n] = random.choice(weights)
+            retval[(x+2)%n,x] = random.choice(weights)
     # Return the weight matrix
     return retval
