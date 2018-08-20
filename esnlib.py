@@ -183,8 +183,7 @@ def scm(t,o=0.16,k=1.0): return (t + o - (k/(2*np.pi))*np.sin(2*t*np.pi)) % 1.0
 #                       csw:    Connected small world
 #                       erg:    Pseudo-random Erdos-Renyi graph
 #                       ran:    Random Graph
-#                   Coming soon:
-#                       osci:   Forced oscillation graph (hopfield recommended)
+#                       osci:   Forced oscillation graph
 # datatype:         Type of input data
 #                   Currently supported:
 #                       ts, timeseries: Continuous data
