@@ -1,5 +1,6 @@
 import sys
 import time
+import utils
 import random
 import functools
 
@@ -9,66 +10,6 @@ import matplotlib.pyplot as plt
 
 from graphBuilder import graphGen
 from sklearn.linear_model import Perceptron, SGDClassifier
-
-"""
-Copyright 2018 R. Jackman, UMass Amherst
-
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all 
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-SOFTWARE.
-"""        
-
-###############################################################################
-# out -         A printing function for important messages.
-#
-# Input:
-# str:          String to be printed
-# v:            Verbose addition
-###############################################################################
-
-def out(str,quiet,verbose,v=''):
-    # If not quiet
-    if not quiet:
-
-        # And string contains some value
-        if str != '':
-            # Print it!
-            print(str)
-        
-        # Same check for the verbose, but only if !quiet is true
-        if verbose and (v != ''):
-            print(v)
-
-###############################################################################
-# scm -         The general form for the Sine Circle Mapping. This does not 
-#               include the alpha term as it is not used in any of the current
-#               supported models.
-# 
-# Inputs:
-# t:            Theta n, the current value of the cell
-# o:            Omega, the driving signal
-# k:            K, the nonlinearity constant
-#
-# Outputs:
-# theta n+1     The next value in the cell
-###############################################################################
-
-def scm(t,o=0.16,k=1.0): return (t + o - (k/(2*np.pi))*np.sin(2*t*np.pi)) % 1.0
-
 ###############################################################################
 # Echo State Network Class - 
 #       This class contains all of the models presented in the paper, and all 
@@ -154,7 +95,7 @@ class esn:
         # Define loquaciousness of program
         self.q = quiet
         self.v = verbose
-        out('This model will not be verbose...', self.q, self.v, 'Just kidding!')
+        utils.out('This model will not be verbose...', self.q, self.v, 'Just kidding!')
 
         # Check for input node output node overlap, exit in case of overlap
         if ins != None and outs != None:
@@ -169,13 +110,13 @@ class esn:
             self.outp = outputNodes
             self.inputNodes = nodes[:inputNodes]
             self.outputNodes = nodes[inputNodes:]
-            out('Input and output locations generated', self.q, self.v, 'Inputs located at nodes ' + str(self.inputNodes) + ' and outputs located at nodes ' + str(self.outputNodes))
+            utils.out('Input and output locations generated', self.q, self.v, 'Inputs located at nodes ' + str(self.inputNodes) + ' and outputs located at nodes ' + str(self.outputNodes))
 
         # If only outs is undefined, generate some output locations
         elif ins != None:
             if len(ins) != inputNodes:
                 if not self.q:
-                    out("Length of input node array inequal to inputNodes, overriding inputNodes", self.q, self.v)
+                    utils.out("Length of input node array inequal to inputNodes, overriding inputNodes", self.q, self.v)
                 self.inp = len(ins)
             else:
                 self.inp = inputNodes
@@ -183,12 +124,12 @@ class esn:
             x = range(reservoirSize)
             toUse = [i for i in x if i not in ins]
             self.outputNodes = random.sample(toUse,outputNodes)
-            out("Output nodes generated", self.q, self.v, "Outputs located at nodes " + str(self.outputNodes))
+            utils.out("Output nodes generated", self.q, self.v, "Outputs located at nodes " + str(self.outputNodes))
 
         # And vice versa for inputs locations
         elif outs != None:
             if len(outs) != outputNodes:
-                out("Length of output node array inequal to outputNodes, overriding outputNodes", self.q, self.v)
+                utils.out("Length of output node array inequal to outputNodes, overriding outputNodes", self.q, self.v)
                 self.outp = len(outs)
             else:
                 self.outp = outputNodes
@@ -196,7 +137,7 @@ class esn:
             x = range(reservoirSize)
             toUse = [i for i in x if i not in outs]
             self.inputNodes = random.sample(toUse,inputNodes)
-            out("Input nodes generated", self.q, self.v, "Inputs located at nodes " + str(self.inputNodes))
+            utils.out("Input nodes generated", self.q, self.v, "Inputs located at nodes " + str(self.inputNodes))
         
         # Save the reservoir size and the random seed for future use
         self.res = reservoirSize
@@ -210,7 +151,7 @@ class esn:
             if wm[0] != wm[1]:
                 sys.exit("Predefined weight matrix is not square, cannot perform surjective mapping computation")
             if wm[0] != reservoirSize:
-                out('reservoirSize is not equal to the size of weightMatrix, using size of weightMatrix', self.q, self.v)
+                utils.out('reservoirSize is not equal to the size of weightMatrix, using size of weightMatrix', self.q, self.v)
                 reservoirSize = wm[0]
 
             # And assign it
@@ -222,16 +163,16 @@ class esn:
             # Generate new matricies accordingly
             if matrixType == 'osci':
                 self.W = graphGen(self.res, p=prob, seed=self.s, type='osci')
-                out("Oscillatory graph generated successfully", self.q, self.v)
+                utils.out("Oscillatory graph generated successfully", self.q, self.v)
             elif matrixType == 'csw':
                 self.W = nx.to_numpy_matrix(nx.connected_watts_strogatz_graph(self.res, int(np.floor(np.sqrt(self.res) + 1)), self.p, tries=100, seed=self.s))
-                out("Connected Small World graph generated successfully", self.q, self.v)
+                utils.out("Connected Small World graph generated successfully", self.q, self.v)
             elif matrixType == 'erg':
                 self.W = nx.to_numpy_matrix(nx.erdos_renyi_graph(self.res, self.p, seed=self.s, directed=True))
-                out("Erdos-Reyni Graph generated successfully", self.q, self.v)
+                utils.out("Erdos-Reyni Graph generated successfully", self.q, self.v)
             elif matrixType == 'ran':
                 self.W = np.random.rand(self.res,self.res)
-                out("Random Graph generated", self.q, self.v)
+                utils.out("Random Graph generated", self.q, self.v)
             else:
                 sys.exit("Matrix type not recognized")
         
@@ -239,7 +180,7 @@ class esn:
         if iterationThr > 0:
             self.stopIt = iterationThr
         else:
-            out("Iteration threshold is less than 1, defaulting to 100", self.q, self.v)
+            utils.out("Iteration threshold is less than 1, defaulting to 100", self.q, self.v)
         
         # Grab some dangling variables
         self.tol = tolelrance
@@ -267,7 +208,7 @@ class esn:
             self.thresh = None
                 
         self.perc = SGDClassifier(random_state=seed)
-        out("ESN defined successfully!", self.q, self.v, "Completed in " + str(time.time()-st) + " seconds.")
+        utils.out("ESN defined successfully!", self.q, self.v, "Completed in " + str(time.time()-st) + " seconds.")
         
 ###############################################################################
 # fit -         A function to train output weights for esn. This will only fit 
@@ -328,7 +269,7 @@ class esn:
         # Check the structure
         if self.up == 'hop':
             # Important preprocessing
-            out("Hopfield architecture initialized", self.q, self.v)
+            utils.out("Hopfield architecture initialized", self.q, self.v)
             st = time.time()
 
             # Predefine buffer for convergence checking
@@ -353,7 +294,7 @@ class esn:
                 if self.thresh == np.tanh:
                     fullReservoir = self.thresh(self.a*np.dot(self.W,fullReservoir) + (1-self.a)*fullReservoir)
                 else:
-                    fullReservoir = scm(self.a*np.dot(self.W,fullReservoir) + (1-self.a)*fullReservoir, o=self.o, k=self.k)
+                    fullReservoir = utils.scm(self.a*np.dot(self.W,fullReservoir) + (1-self.a)*fullReservoir, o=self.o, k=self.k)
                     
                 fullReservoir = np.resize(fullReservoir, self.res)
                 for j in range(self.outp):
@@ -365,27 +306,13 @@ class esn:
                 
                 # Iterate iterator iteratively
                 i += 1
-            
-            '''
-            This next green block is a fossil of old code. This was important 
-            to make sure continuous data has converged. The project model did
-            not need it, however. 
-            '''
 
-            # if convergence is not reached, send error
-            # if not converged:
-            #     sys.exit("Solution not converged in limit")
-            # else:
-            #     # Else return the related information
-            #     g = self.converge(buffer, boo=False)
-            #     m = int(max(g))
-
-            out("Hopfield architecture complete", self.q, self.v, "Finished in " + str(time.time() - st) + " seconds")
+            utils.out("Hopfield architecture complete", self.q, self.v, "Finished in " + str(time.time() - st) + " seconds")
             return buffer[-1:,:] 
 
         elif self.up == 'lat':
             # Preprocessing
-            out("Lattice structure initialized", self.q, self.v)
+            utils.out("Lattice structure initialized", self.q, self.v)
             st = time.time()
 
             # Alignment checks
@@ -404,15 +331,15 @@ class esn:
             # Propogating the information through the lattice
             for i in range(self.shp[1]):
                 for j in range(self.shp[0]):
-                    inpt[j] = scm(inpt[j], self.os[j,i], self.ks[j,i])
-                out('', self.q, self.v,"Row " + str(i) + " propogated")
+                    inpt[j] = utils.scm(inpt[j], self.os[j,i], self.ks[j,i])
+                utils.out('', self.q, self.v,"Row " + str(i) + " propogated")
             
-            out("Lattice completed", self.q, self.v, "Finished in " + str(time.time()-st) + ' seconds')
+            utils.out("Lattice completed", self.q, self.v, "Finished in " + str(time.time()-st) + ' seconds')
             return inpt
 
         elif self.up == 'tor':
             # Preprocessing
-            out("Torus structure initiated", self.q, self.v)
+            utils.out("Torus structure initiated", self.q, self.v)
             st = time.time()
 
             # Alignment checks
@@ -442,13 +369,13 @@ class esn:
 
             # While under convergence limit and not yet converged
             while i < self.cl and not converged:
-                out('', self.q, self.v, 'Iteration ' + str(i) + ' initiated')
+                utils.out('', self.q, self.v, 'Iteration ' + str(i) + ' initiated')
 
                 # Define a new vector to store values
                 temp = inpt
 
                 # Propogate the values in the vector to the next layer
-                temp[j % self.shp[0]] = scm(inpt[j % self.shp[0]], self.os[j % self.shp[0],i % self.shp[1]], self.ks[j % self.shp[0],i % self.shp[1]])
+                temp[j % self.shp[0]] = utils.scm(inpt[j % self.shp[0]], self.os[j % self.shp[0],i % self.shp[1]], self.ks[j % self.shp[0],i % self.shp[1]])
 
                 # Update the buffer
                 for k in range(self.shp[0]):
@@ -464,7 +391,7 @@ class esn:
                 if j % self.shp[0] == 0:
                     i += 1
             
-            out("Calculations over", self.q, self.v, "Finished in " + str(time.time() - st) + " seconds")
+            utils.out("Calculations over", self.q, self.v, "Finished in " + str(time.time() - st) + " seconds")
 
             # if convergence is not reached, send error
             if not converged:
@@ -505,7 +432,7 @@ class esn:
             t = 0
             while not converged and t < self.cl:
                 t += 1
-                g = np.gradient(theta, axis=0)*self.objective(theta,X,y)
+                g = np.gradient(theta, axis=0)*utils.objective(theta,X,y)
                 m = beta1*m + (1-beta1)*g
                 v = beta2*v + (1-beta2)*np.square(g)
                 mhat = m/(1-(beta1**t))
@@ -581,63 +508,3 @@ class esn:
             return True
         else:
             return retval
-    
-###############################################################################
-# objective -   A function that returns the error of the current weight matrix.
-#               Currently either returns percent correct or MSE.
-#
-# Input:
-# curr:         The current weight matrix guess
-# x:            ESN output
-# y:            yactual, to test against
-# p:            If true, return a percentage from 0.0 to 1.0, else return MSE
-#
-# Output:
-# return value: Mean Squared Error of the current weights
-###############################################################################
-
-    def objective(self, curr, x, y, p = False):
-        # Preset total for scoring later
-        total = 0.0
-
-        # Loop through examples, add the L2 norm of the product of the example
-        # and the array
-        for i in range(x.shape[0]):
-            if p:
-                total += (1 if abs(self.perc.predict(x[i,:].reshape(1,-1)) - y[i,:]) < self.tol else 0)
-            else:
-                total += np.linalg.norm(self.perc.predict(x[i,:].reshape(1,-1)) - y[i,:])
-
-        # Return total/numOfEntries, or the average
-        return total/x.shape[0]
-
-###############################################################################
-# score -       A function that scores the reservoir on test set. Just runs 
-#               through all test values and checks for correct class 
-#               prediction.
-#
-# Input:
-# x:            ESN output
-# y:            yactual, to test against
-# raw:          True if the data being scored has not been run through the 
-#               reservoir
-# p:            Fercentage flag for objective function
-#
-# Output:
-# Score:        The score of the model, either in MSE or percentage
-###############################################################################
-
-    def score(self, x, y, raw = False, p = True):
-        if raw:
-            # An array to hold outputs from the network
-            X = np.zeros((x.shape[0],self.outp))
-
-            # Loop through all data and propogate through network, storing 
-            # output (This code looks...familiar..)
-            for i in range(x.shape[0]):
-                X[i,:] = self.run(x[i,:], 0)
-        else:
-            X = x
-
-        # Return the l2 norm as error
-        return self.objective(self.coefs, X, y, p=p)
